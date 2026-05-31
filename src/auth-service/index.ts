@@ -1,12 +1,12 @@
 export {
   AuthContext,
-  AuthProvider,
   type AuthActionResult,
   type AuthContextValue,
   type AuthCredentials,
   type AuthProviderProps,
   type SignUpParams,
 } from './context/AuthContext'
+export { AuthProvider } from './context/AuthProvider'
 export {
   createSupabaseClient,
   getSupabaseClient,

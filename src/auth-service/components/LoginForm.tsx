@@ -22,30 +22,27 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const { signIn } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [failedAttempts, setFailedAttempts] = useState(0)
-  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null)
   const [lockoutRemaining, setLockoutRemaining] = useState(0)
 
   useEffect(() => {
-    if (!lockoutUntil) {
+    if (lockoutRemaining <= 0) {
       return
     }
 
     const interval = window.setInterval(() => {
-      const remaining = Math.max(0, lockoutUntil - Date.now())
-      setLockoutRemaining(remaining)
-      if (remaining === 0) {
-        setLockoutUntil(null)
-        setFailedAttempts(0)
-      }
+      setLockoutRemaining((previous) => {
+        const next = Math.max(0, previous - 1000)
+        if (next === 0) {
+          setFailedAttempts(0)
+        }
+        return next
+      })
     }, 1000)
 
     return () => window.clearInterval(interval)
-  }, [lockoutUntil])
+  }, [lockoutRemaining])
 
-  const isLocked = useMemo(
-    () => lockoutUntil !== null && lockoutRemaining > 0,
-    [lockoutRemaining, lockoutUntil],
-  )
+  const isLocked = useMemo(() => lockoutRemaining > 0, [lockoutRemaining])
   const lockoutSeconds = Math.ceil(lockoutRemaining / 1000)
 
   const {
@@ -67,14 +64,11 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
       setFailedAttempts(nextAttempts)
       setErrorMessage(error)
       if (nextAttempts >= MAX_ATTEMPTS) {
-        const until = Date.now() + LOCKOUT_MS
-        setLockoutUntil(until)
         setLockoutRemaining(LOCKOUT_MS)
       }
       return
     }
     setFailedAttempts(0)
-    setLockoutUntil(null)
     setLockoutRemaining(0)
     onSuccess?.()
   }

@@ -1,48 +1,15 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { getSupabaseClient } from '../config/supabaseClient'
-import { useLogger, type AuthLogger } from '../hooks/useLogger'
-
-export type AuthCredentials = {
-  email: string
-  password: string
-}
-
-export type SignUpParams = AuthCredentials & {
-  emailRedirectTo?: string
-}
-
-export type AuthActionResult = {
-  error: string | null
-}
-
-export type AuthContextValue = {
-  user: User | null
-  session: Session | null
-  loading: boolean
-  signIn: (credentials: AuthCredentials) => Promise<AuthActionResult>
-  signUp: (params: SignUpParams) => Promise<AuthActionResult>
-  signOut: () => Promise<AuthActionResult>
-  resetPassword: (email: string, redirectTo?: string) => Promise<AuthActionResult>
-  updatePassword: (password: string) => Promise<AuthActionResult>
-}
-
-export type AuthProviderProps = {
-  children: ReactNode
-  supabaseClient?: SupabaseClient
-  logger?: AuthLogger
-  emailRedirectTo?: string
-  passwordResetRedirectTo?: string
-}
-
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+import { useLogger } from '../hooks/useLogger'
+import {
+  AuthContext,
+  type AuthActionResult,
+  type AuthCredentials,
+  type AuthProviderProps,
+  type AuthContextValue,
+  type SignUpParams,
+} from './AuthContext'
 
 export const AuthProvider = ({
   children,
@@ -51,7 +18,7 @@ export const AuthProvider = ({
   emailRedirectTo,
   passwordResetRedirectTo,
 }: AuthProviderProps) => {
-  const supabase = useMemo(
+  const supabase = useMemo<SupabaseClient>(
     () => supabaseClient ?? getSupabaseClient(),
     [supabaseClient],
   )
