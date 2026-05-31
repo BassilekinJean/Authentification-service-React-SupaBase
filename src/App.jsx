@@ -1,121 +1,110 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { LoginForm } from './auth-service/components/LoginForm'
+import { RegisterForm } from './auth-service/components/RegisterForm'
+import { ForgotPasswordForm } from './auth-service/components/ForgotPasswordForm'
+import { ResetPasswordForm } from './auth-service/components/ResetPasswordForm'
+import { ProtectedRoute } from './auth-service/components/ProtectedRoute'
+import { useAuth } from './auth-service/hooks/useAuth'
 
-function App() {
-  const [count, setCount] = useState(0)
+const TabLink = ({ to, children }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `rounded-full px-4 py-2 text-sm font-medium transition ${
+        isActive
+          ? 'bg-indigo-600 text-white shadow'
+          : 'bg-white text-slate-600 shadow-sm hover:text-slate-900'
+      }`
+    }
+  >
+    {children}
+  </NavLink>
+)
+
+const LoginPage = () => {
+  const navigate = useNavigate()
+  return <LoginForm onSuccess={() => navigate('/dashboard')} />
+}
+
+const DashboardPage = () => {
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login')
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <div className="w-full max-w-md space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold text-slate-900">Session active</h2>
+        <p className="text-sm text-slate-600">
+          Connecte en tant que{' '}
+          <span className="font-medium text-slate-900">{user?.email ?? ''}</span>
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={handleSignOut}
+        className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+      >
+        Se deconnecter
+      </button>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-100 px-4 py-10 text-left">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+        <header className="space-y-3 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-indigo-600">
+            Auth Service
           </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold text-slate-900">
+              Formulaires Supabase
+            </h1>
+            <p className="max-w-2xl text-sm text-slate-600">
+              Utilise ces ecrans pour tester la connexion, l'inscription et la
+              reinitialisation de mot de passe.
+            </p>
+          </div>
+        </header>
 
-      <div className="ticks"></div>
+        <nav className="flex flex-wrap gap-2">
+          <TabLink to="/login">Connexion</TabLink>
+          <TabLink to="/register">Inscription</TabLink>
+          <TabLink to="/forgot-password">Mot de passe oublie</TabLink>
+          <TabLink to="/reset-password">Nouveau mot de passe</TabLink>
+          <TabLink to="/dashboard">Dashboard</TabLink>
+        </nav>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="flex w-full justify-center">
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterForm />} />
+            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+            <Route path="/reset-password" element={<ResetPasswordForm />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute
+                  redirectTo="/login"
+                  fallback={<div className="text-sm text-slate-500">Chargement...</div>}
+                >
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </div>
+    </div>
   )
 }
 
