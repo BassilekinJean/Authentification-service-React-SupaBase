@@ -14,3 +14,26 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Auth Service (Supabase JWT)
+
+Le module réutilisable se trouve dans `src/auth-service` et expose un contexte React, des composants UI, et un guard de route.
+
+### Configuration requise
+
+Ajoutez vos variables Supabase dans un fichier `.env.local` :
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Le `AuthProvider` supporte :
+
+- `emailRedirectTo` : URL de validation d'email.
+- `passwordResetRedirectTo` : URL de réinitialisation du mot de passe.
+- `supabaseClient` : client Supabase custom si besoin.
+
+### Composants disponibles
+
+- `LoginForm`, `RegisterForm`, `ForgotPasswordForm`, `ResetPasswordForm`
+- `ProtectedRoute`
+- Hooks : `useAuth`, `useLogger`
